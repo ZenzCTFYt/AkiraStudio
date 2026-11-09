@@ -182,6 +182,23 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.main_menu, menu)
         menu.findItem(R.id.action_desktop)?.isChecked = desktopMode
         menu.findItem(R.id.action_fit)?.isChecked = fitToScreen
+
+        val exts = ExtensionManager.list(this)
+        val sub = menu.addSubMenu("Extensions")
+        if (exts.isEmpty()) {
+            sub.add("No extensions installed")
+        } else {
+            exts.forEachIndexed { index, ext ->
+                sub.add(1, index + 1000, index, ext.name).setOnMenuItemClickListener {
+                    ExtensionPopup.show(this@MainActivity, ext)
+                    true
+                }
+            }
+        }
+        sub.add(1, 9999, 10000, "Manage Extensions").setOnMenuItemClickListener {
+            startActivity(Intent(this@MainActivity, ExtensionsActivity::class.java))
+            true
+        }
         return true
     }
 
