@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AkiraStudio</string>
+    <string name="loading">Loading…</string>
+    <string name="open_studio">TikTok Studio</string>
+    <string name="extensions">Extensions</string>
+    <string name="import_zip">Import ZIP</string>
+    <string name="delete">Delete</string>
+    <string name="enabled">Enabled</string>
+</resources>
