@@ -49,10 +49,27 @@ class MainActivity : AppCompatActivity() {
         ExtensionManager.init(this)
         setupWebView()
 
-        findViewById<android.widget.Button>(R.id.btnOpenTikTok).setOnClickListener { openTikTok() }
-        findViewById<android.widget.Button>(R.id.btnOpenStudio).setOnClickListener { openStudio() }
+        findViewById<android.widget.Button>(R.id.btnOpenTikTok).setOnClickListener {
+            animateClick(it); openTikTok()
+        }
+        findViewById<android.widget.Button>(R.id.btnOpenStudio).setOnClickListener {
+            animateClick(it); openStudio()
+        }
         findViewById<android.widget.Button>(R.id.btnExtensions).setOnClickListener {
-            startActivity(Intent(this, ExtensionsActivity::class.java))
+            animateClick(it); startActivity(Intent(this, ExtensionsActivity::class.java))
+        }
+
+        findViewById<android.widget.Button>(R.id.navHome).setOnClickListener {
+            animateClick(it); showHome()
+        }
+        findViewById<android.widget.Button>(R.id.navLogin).setOnClickListener {
+            animateClick(it); openTikTok()
+        }
+        findViewById<android.widget.Button>(R.id.navStudio).setOnClickListener {
+            animateClick(it); openStudio()
+        }
+        findViewById<android.widget.Button>(R.id.navExtensions).setOnClickListener {
+            animateClick(it); startActivity(Intent(this, ExtensionsActivity::class.java))
         }
 
         requestRuntimePermissions()
@@ -64,19 +81,56 @@ class MainActivity : AppCompatActivity() {
         } else {
             homePanel.visibility = android.view.View.VISIBLE
             webView.visibility = android.view.View.GONE
+            homePanel.alpha = 0f
+            homePanel.animate().alpha(1f).setDuration(220).start()
         }
     }
 
+    private fun animateClick(v: android.view.View) {
+        v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(90).withEndAction {
+            v.animate().scaleX(1f).scaleY(1f).setDuration(90).start()
+        }.start()
+    }
+
+    private fun showHome() {
+        if (homePanel.visibility == android.view.View.VISIBLE) return
+        webView.animate().alpha(0f).setDuration(140).withEndAction {
+            webView.visibility = android.view.View.GONE
+            webView.alpha = 1f
+            homePanel.visibility = android.view.View.VISIBLE
+            homePanel.alpha = 0f
+            homePanel.animate().alpha(1f).setDuration(180).start()
+        }.start()
+    }
+
     private fun openTikTok() {
-        homePanel.visibility = android.view.View.GONE
-        webView.visibility = android.view.View.VISIBLE
-        webView.loadUrl("https://www.tiktok.com/login")
+        if (homePanel.visibility == android.view.View.VISIBLE) {
+            homePanel.animate().alpha(0f).setDuration(140).withEndAction {
+                homePanel.visibility = android.view.View.GONE
+                homePanel.alpha = 1f
+                webView.visibility = android.view.View.VISIBLE
+                webView.alpha = 0f
+                webView.loadUrl("https://www.tiktok.com/login")
+                webView.animate().alpha(1f).setDuration(180).start()
+            }.start()
+        } else {
+            webView.loadUrl("https://www.tiktok.com/login")
+        }
     }
 
     private fun openStudio() {
-        homePanel.visibility = android.view.View.GONE
-        webView.visibility = android.view.View.VISIBLE
-        webView.loadUrl("https://www.tiktok.com/tiktokstudio/upload?from=creator_center&tab=video")
+        if (homePanel.visibility == android.view.View.VISIBLE) {
+            homePanel.animate().alpha(0f).setDuration(140).withEndAction {
+                homePanel.visibility = android.view.View.GONE
+                homePanel.alpha = 1f
+                webView.visibility = android.view.View.VISIBLE
+                webView.alpha = 0f
+                webView.loadUrl("https://www.tiktok.com/tiktokstudio/upload?from=creator_center&tab=video")
+                webView.animate().alpha(1f).setDuration(180).start()
+            }.start()
+        } else {
+            webView.loadUrl("https://www.tiktok.com/tiktokstudio/upload?from=creator_center&tab=video")
+        }
     }
 
     override fun onSaveInstanceState(outState: android.os.Bundle) {
@@ -212,8 +266,7 @@ class MainActivity : AppCompatActivity() {
         } else if (webView.visibility == android.view.View.VISIBLE && webView.canGoBack()) {
             webView.goBack()
         } else {
-            homePanel.visibility = android.view.View.VISIBLE
-            webView.visibility = android.view.View.GONE
+            showHome()
         }
     }
 

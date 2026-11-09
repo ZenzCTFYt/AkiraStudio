@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F2F2F7">
 
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="72dp"
         android:visibility="gone" />
 
     <LinearLayout
@@ -15,7 +17,9 @@
         android:gravity="center"
         android:padding="24dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="72dp"
+        android:background="@drawable/glass_bg">
 
         <TextView
             android:layout_width="wrap_content"
@@ -23,25 +27,84 @@
             android:text="AkiraStudio"
             android:textSize="28sp"
             android:textStyle="bold"
+            android:textColor="#0f172a"
             android:paddingBottom="24dp" />
 
         <Button
             android:id="@+id/btnOpenTikTok"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Buka Web Login TikTok" />
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/glass_button"
+            android:text="Buka Web Login TikTok"
+            android:textColor="#0f172a" />
 
         <Button
             android:id="@+id/btnOpenStudio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Buka TikTok Studio" />
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/glass_button"
+            android:text="Buka TikTok Studio"
+            android:textColor="#0f172a" />
 
         <Button
             android:id="@+id/btnExtensions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tambah Extensions" />
+            android:background="@drawable/glass_button"
+            android:text="Tambah Extensions"
+            android:textColor="#0f172a" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom"
+        android:padding="8dp"
+        android:background="@drawable/glass_bg"
+        android:elevation="8dp">
+
+        <Button
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:background="@drawable/glass_button"
+            android:text="Home"
+            android:textColor="#0f172a" />
+
+        <Button
+            android:id="@+id/navLogin"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/glass_button"
+            android:text="Login"
+            android:textColor="#0f172a" />
+
+        <Button
+            android:id="@+id/navStudio"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/glass_button"
+            android:text="Studio"
+            android:textColor="#0f172a" />
+
+        <Button
+            android:id="@+id/navExtensions"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/glass_button"
+            android:text="Ext"
+            android:textColor="#0f172a" />
     </LinearLayout>
 
     <ProgressBar

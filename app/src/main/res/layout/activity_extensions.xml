@@ -3,35 +3,50 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="12dp">
+    android:padding="12dp"
+    android:background="#F2F2F7">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/glass_bg"
+        android:padding="8dp">
+
         <Button
             android:id="@+id/btnImport"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/import_zip" />
+            android:background="@drawable/glass_button"
+            android:text="Import ZIP"
+            android:textColor="#0f172a" />
+
         <Button
             android:id="@+id/btnDelete"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/delete" />
+            android:layout_marginStart="8dp"
+            android:background="@drawable/glass_button"
+            android:text="Delete"
+            android:textColor="#0f172a" />
     </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:text="Installed extensions:" />
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:text="Import extension .zip (manifest.json + content_scripts). Toggle to enable."
+        android:textColor="#475569" />
 
     <ListView
         android:id="@+id/listExtensions"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@drawable/glass_bg"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp" />
 </LinearLayout>
