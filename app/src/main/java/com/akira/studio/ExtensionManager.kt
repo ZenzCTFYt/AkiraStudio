@@ -1,6 +1,7 @@
 package com.akira.studio
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.webkit.WebView
 import org.json.JSONArray
@@ -24,6 +25,11 @@ object ExtensionManager {
         val version: String,
         val dir: File,
         var enabled: Boolean,
+        val manifestVersion: Int,
+        val iconPath: String?,
+        val actionPopup: String?,
+        val backgroundScripts: List<String>,
+        val serviceWorker: String?,
         val contentScripts: List<ContentScript>
     )
 
@@ -65,6 +71,23 @@ object ExtensionManager {
             val json = JSONObject(mf.readText())
             val name = json.optString("name", dir.name)
             val version = json.optString("version", "0")
+            val manifestVersion = json.optInt("manifest_version", 2)
+
+            val action = json.optJSONObject("action")
+                ?: json.optJSONObject("browser_action")
+                ?: json.optJSONObject("page_action")
+            val defaultPopup = action?.optString("default_popup")?.takeIf { it.isNotBlank() }
+
+            val iconsObj = action?.optJSONObject("default_icon")
+                ?: json.optJSONObject("icons")
+            val iconPath = pickIcon(iconsObj, dir)
+
+            val bg = json.optJSONObject("background")
+            val bgScripts = bg?.optJSONArray("scripts")?.let { a ->
+                (0 until a.length()).map { a.getString(it) }
+            } ?: emptyList()
+            val serviceWorker = bg?.optString("service_worker")?.takeIf { it.isNotBlank() }
+
             val csArr = json.optJSONArray("content_scripts") ?: JSONArray()
             val scripts = mutableListOf<ContentScript>()
             for (i in 0 until csArr.length()) {
@@ -81,10 +104,30 @@ object ExtensionManager {
                 val runAt = o.optString("run_at", "document_idle")
                 scripts.add(ContentScript(matches, js, css, runAt))
             }
-            Extension(dir.name, name, version, dir, prefs(context).getBoolean(dir.name, true), scripts)
+
+            Extension(dir.name, name, version, dir, prefs(context).getBoolean(dir.name, true),
+                manifestVersion, iconPath, defaultPopup, bgScripts, serviceWorker, scripts)
         } catch (e: Exception) {
             null
         }
+    }
+
+    private fun pickIcon(iconsObj: JSONObject?, dir: File): String? {
+        if (iconsObj == null) return null
+        // choose largest size
+        var bestSize = 0
+        var bestPath: String? = null
+        val keys = iconsObj.keys()
+        while (keys.hasNext()) {
+            val k = keys.next()
+            val size = k.toIntOrNull() ?: 0
+            val path = iconsObj.optString(k)
+            if (size >= bestSize && path.isNotBlank()) {
+                bestSize = size
+                bestPath = path
+            }
+        }
+        return bestPath
     }
 
     fun importZip(context: Context, uri: Uri): Boolean {
@@ -156,11 +199,25 @@ object ExtensionManager {
         prefs(context).edit().remove(id).apply()
     }
 
+    fun iconDrawable(context: Context, ext: Extension): Drawable? {
+        val path = ext.iconPath ?: return null
+        val f = File(ext.dir, path)
+        if (!f.exists()) return null
+        return Drawable.createFromPath(f.absolutePath)
+    }
+
+    fun popupFile(ext: Extension): File? {
+        val p = ext.actionPopup ?: return null
+        val f = File(ext.dir, p)
+        return if (f.exists()) f else null
+    }
+
     fun injectForUrl(context: Context, webView: WebView, url: String) {
         init(context)
         for (ext in extensions.filter { it.enabled }) {
             for (cs in ext.contentScripts) {
                 if (!cs.matches.any { match(it, url) }) continue
+                // css
                 val cssText = cs.css.mapNotNull { readFile(ext.dir, it) }.joinToString("\n")
                 if (cssText.isNotBlank()) {
                     val escaped = cssText.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n")
@@ -169,8 +226,11 @@ object ExtensionManager {
                         null
                     )
                 }
+                // js
                 for (jsFile in cs.js) {
                     val js = readFile(ext.dir, jsFile) ?: continue
+                    // inject polyfill first
+                    webView.evaluateJavascript(CHROME_POLYFILL, null)
                     webView.evaluateJavascript(js, null)
                 }
             }
@@ -204,4 +264,57 @@ object ExtensionManager {
 
     private fun sanitize(s: String): String =
         s.lowercase().replace(Regex("[^a-z0-9]+"), "_").trim('_').ifBlank { "ext" }
+
+    const val CHROME_POLYFILL = """
+(function(){
+  if(window.chrome && window.chrome.runtime && window.chrome.__akira) return;
+  window.chrome = window.chrome || {};
+  window.chrome.__akira = true;
+  const AC = window.AndroidChrome;
+  function safeParse(s){ try { return JSON.parse(s); } catch(e){ return null; } }
+  window.chrome.runtime = window.chrome.runtime || {};
+  window.chrome.runtime.id = (AC && AC.getExtId) ? AC.getExtId() : 'akira_ext';
+  window.chrome.runtime.getURL = function(p){ return AC ? AC.getURL(p) : p; };
+  window.chrome.runtime.sendMessage = function(msg, cb){
+    if(!AC) return;
+    AC.sendMessage(JSON.stringify(msg==null?'':msg));
+    if(cb) setTimeout(()=>cb(),0);
+  };
+  window.chrome.runtime.onMessage = window.chrome.runtime.onMessage || { addListener: function(cb){ if(AC) AC.addMessageListener('cb'); window.__chromeMsgCbs = window.__chromeMsgCbs||[]; window.__chromeMsgCbs.push(cb); } };
+  window.chrome.runtime.__dispatchCallback = function(id,msg){ (window.__chromeMsgCbs||[]).forEach(function(cb){ try{cb(msg);}catch(e){} }); };
+  window.chrome.storage = window.chrome.storage || {};
+  window.chrome.storage.local = {
+    get: function(keys, cb){
+      if(!AC){ if(cb) cb({}); return; }
+      let all = safeParse(AC.storageGetAll()) || {};
+      let res = {};
+      if(keys==null){ res = all; }
+      else if(typeof keys === 'string'){ res[keys]=all[keys]; }
+      else if(Array.isArray(keys)){ keys.forEach(k=>{ res[k]=all[k]; }); }
+      else if(typeof keys === 'object'){ Object.keys(keys).forEach(k=>{ res[k] = (all[k]!==undefined?all[k]:keys[k]); }); }
+      if(cb) cb(res);
+      return Promise.resolve(res);
+    },
+    set: function(items, cb){
+      if(AC){ Object.keys(items||{}).forEach(k=>{ AC.storageSet(k, JSON.stringify(items[k])); }); }
+      if(cb) cb();
+      return Promise.resolve();
+    },
+    remove: function(keys, cb){
+      if(AC){ (Array.isArray(keys)?keys:[keys]).forEach(k=>AC.storageSet(k,'null')); }
+      if(cb) cb();
+      return Promise.resolve();
+    }
+  };
+  window.chrome.tabs = window.chrome.tabs || {};
+  window.chrome.tabs.query = function(q, cb){ if(cb) cb([{id:1,url: AC?AC.currentUrl():location.href,active:true}]); return Promise.resolve([{id:1}]); };
+  window.chrome.tabs.sendMessage = function(tabId,msg,cb){ window.chrome.runtime.sendMessage(msg,cb); };
+  window.chrome.scripting = window.chrome.scripting || {};
+  window.chrome.scripting.executeScript = function(inj, cb){
+    if(AC && inj && inj.func){ AC.executeScript(inj.func.toString()); }
+    if(cb) cb([]);
+  };
+  window.chrome.action = window.chrome.action || { setIcon:function(){}, setTitle:function(){}, setPopup:function(){} };
+})();
+"""
 }

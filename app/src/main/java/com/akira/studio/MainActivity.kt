@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webView)
+        ExtensionRuntime.mainWebView = webView
         splash = findViewById(R.id.splash)
         homePanel = findViewById(R.id.homePanel)
         webView.setBackgroundColor(android.graphics.Color.parseColor("#F2F2F7"))
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             animateClick(it); openStudio()
         }
         findViewById<android.widget.Button>(R.id.navExtensions).setOnClickListener {
-            animateClick(it); startActivity(Intent(this, ExtensionsActivity::class.java))
+            animateClick(it); showExtensionsPopup(it)
         }
 
         requestRuntimePermissions()
@@ -95,6 +96,40 @@ class MainActivity : AppCompatActivity() {
         v.animate().scaleX(0.94f).scaleY(0.94f).setDuration(90).withEndAction {
             v.animate().scaleX(1f).scaleY(1f).setDuration(90).start()
         }.start()
+    }
+
+    private fun showExtensionsPopup(anchor: android.view.View) {
+        val exts = ExtensionManager.list(this)
+        val popupView = layoutInflater.inflate(R.layout.popup_extensions, null)
+        val listView = popupView.findViewById<android.widget.ListView>(R.id.listPopupExts)
+        val adapter = object : android.widget.BaseAdapter() {
+            override fun getCount() = exts.size
+            override fun getItem(position: Int) = exts[position]
+            override fun getItemId(position: Int) = position.toLong()
+            override fun getView(position: Int, convertView: android.view.View?, parent: android.view.ViewGroup?): android.view.View {
+                val v = convertView ?: layoutInflater.inflate(R.layout.item_extension, parent, false)
+                val ext = exts[position]
+                v.findViewById<android.widget.TextView>(R.id.tvName).text = ext.name
+                v.findViewById<android.widget.TextView>(R.id.tvVersion).text = ext.version
+                v.findViewById<android.widget.ImageView>(R.id.ivIcon).setImageDrawable(ExtensionManager.iconDrawable(this@MainActivity, ext))
+                v.findViewById<android.widget.CheckBox>(R.id.cbEnabled).visibility = android.view.View.GONE
+                v.findViewById<android.widget.Button>(R.id.btnOpen).setOnClickListener {
+                    ExtensionPopup.show(this@MainActivity, ext)
+                }
+                return v
+            }
+        }
+        listView.adapter = adapter
+        listView.setOnItemClickListener { _, _, pos, _ ->
+            ExtensionPopup.show(this, exts[pos])
+        }
+        popupView.findViewById<android.widget.Button>(R.id.btnManageExts).setOnClickListener {
+            startActivity(Intent(this, ExtensionsActivity::class.java))
+        }
+        val popup = android.widget.PopupWindow(popupView, (resources.displayMetrics.widthPixels * 0.9).toInt(), android.view.ViewGroup.LayoutParams.WRAP_CONTENT, true)
+        popup.isOutsideTouchable = true
+        popup.elevation = 16f
+        popup.showAsDropDown(anchor, 0, 8)
     }
 
     private fun showHome() {

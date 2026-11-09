@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 class ExtensionsActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
+
     private val importLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -39,7 +41,6 @@ class ExtensionsActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btnDelete).setOnClickListener {
             val checked = listView.checkedItemPositions
-            // delete all checked
             val items = ExtensionManager.list(this)
             for (i in items.indices) {
                 if (checked.get(i)) {
@@ -74,11 +75,17 @@ class ExtensionsActivity : AppCompatActivity() {
             val cb = view.findViewById<android.widget.CheckBox>(R.id.cbEnabled)
             val name = view.findViewById<android.widget.TextView>(R.id.tvName)
             val ver = view.findViewById<android.widget.TextView>(R.id.tvVersion)
+            val icon = view.findViewById<ImageView>(R.id.ivIcon)
+            val btnOpen = view.findViewById<Button>(R.id.btnOpen)
             name.text = ext.name
             ver.text = ext.version
             cb.isChecked = ext.enabled
+            icon.setImageDrawable(ExtensionManager.iconDrawable(activity, ext))
             cb.setOnCheckedChangeListener { _, isChecked ->
                 ExtensionManager.setEnabled(activity, ext.id, isChecked)
+            }
+            btnOpen.setOnClickListener {
+                ExtensionPopup.show(activity, ext)
             }
             return view
         }
