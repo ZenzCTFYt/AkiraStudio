@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_studio" android:title="@string/open_studio" app:showAsAction="ifRoom" />
-    <item android:id="@+id/action_extensions" android:title="@string/extensions" app:showAsAction="ifRoom" />
+    <item android:id="@+id/action_extensions" android:title="@string/extensions" app:showAsAction="never" />
     <item android:id="@+id/action_desktop" android:title="Desktop Mode" android:checkable="true" app:showAsAction="never" />
     <item android:id="@+id/action_fit" android:title="Fit to Screen" android:checkable="true" app:showAsAction="never" />
     <item android:id="@+id/action_zoom_reset" android:title="Zoom 100%" app:showAsAction="never" />
