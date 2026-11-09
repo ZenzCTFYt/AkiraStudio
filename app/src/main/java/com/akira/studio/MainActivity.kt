@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var splash: android.view.View
     private lateinit var homePanel: android.view.View
+    private var desktopMode = true
+    private var fitToScreen = true
 
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
@@ -47,6 +49,9 @@ class MainActivity : AppCompatActivity() {
         webView.setBackgroundColor(android.graphics.Color.parseColor("#F2F2F7"))
 
         ExtensionManager.init(this)
+        val prefs = getSharedPreferences("akira_settings", MODE_PRIVATE)
+        desktopMode = prefs.getBoolean("desktop", true)
+        fitToScreen = prefs.getBoolean("fit", true)
         setupWebView()
 
         findViewById<android.widget.Button>(R.id.btnOpenTikTok).setOnClickListener {
@@ -140,6 +145,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+        menu.findItem(R.id.action_desktop)?.isChecked = desktopMode
+        menu.findItem(R.id.action_fit)?.isChecked = fitToScreen
         return true
     }
 
@@ -157,6 +164,31 @@ class MainActivity : AppCompatActivity() {
                 if (webView.visibility == android.view.View.VISIBLE) webView.reload()
                 true
             }
+            R.id.action_desktop -> {
+                item.isChecked = !item.isChecked
+                desktopMode = item.isChecked
+                getSharedPreferences("akira_settings", MODE_PRIVATE).edit().putBoolean("desktop", desktopMode).apply()
+                if (webView.visibility == android.view.View.VISIBLE) {
+                    val url = webView.url
+                    setupWebView()
+                    if (url != null) webView.loadUrl(url)
+                }
+                true
+            }
+            R.id.action_fit -> {
+                item.isChecked = !item.isChecked
+                fitToScreen = item.isChecked
+                getSharedPreferences("akira_settings", MODE_PRIVATE).edit().putBoolean("fit", fitToScreen).apply()
+                webView.settings.loadWithOverviewMode = fitToScreen
+                if (webView.visibility == android.view.View.VISIBLE) webView.reload()
+                true
+            }
+            R.id.action_zoom_reset -> {
+                webView.settings.textZoom = 100
+                webView.setInitialScale(0)
+                if (webView.visibility == android.view.View.VISIBLE) webView.reload()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -171,9 +203,9 @@ class MainActivity : AppCompatActivity() {
         s.allowContentAccess = true
         s.mediaPlaybackRequiresUserGesture = false
         s.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-        s.userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        s.userAgentString = if (desktopMode) "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" else "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
         s.useWideViewPort = true
-        s.loadWithOverviewMode = true
+        s.loadWithOverviewMode = fitToScreen
         s.setSupportZoom(true)
         s.builtInZoomControls = true
         s.displayZoomControls = false
