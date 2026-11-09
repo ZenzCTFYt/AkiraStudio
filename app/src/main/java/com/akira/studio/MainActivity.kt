@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var splash: android.view.View
+    private lateinit var homePanel: android.view.View
 
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
@@ -42,18 +43,40 @@ class MainActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webView)
         splash = findViewById(R.id.splash)
+        homePanel = findViewById(R.id.homePanel)
         webView.setBackgroundColor(android.graphics.Color.parseColor("#F2F2F7"))
 
         ExtensionManager.init(this)
         setupWebView()
 
+        findViewById<android.widget.Button>(R.id.btnOpenTikTok).setOnClickListener { openTikTok() }
+        findViewById<android.widget.Button>(R.id.btnOpenStudio).setOnClickListener { openStudio() }
+        findViewById<android.widget.Button>(R.id.btnExtensions).setOnClickListener {
+            startActivity(Intent(this, ExtensionsActivity::class.java))
+        }
+
         requestRuntimePermissions()
 
         if (savedInstanceState != null) {
+            homePanel.visibility = android.view.View.GONE
+            webView.visibility = android.view.View.VISIBLE
             webView.restoreState(savedInstanceState)
         } else {
-            webView.loadUrl("https://www.tiktok.com/")
+            homePanel.visibility = android.view.View.VISIBLE
+            webView.visibility = android.view.View.GONE
         }
+    }
+
+    private fun openTikTok() {
+        homePanel.visibility = android.view.View.GONE
+        webView.visibility = android.view.View.VISIBLE
+        webView.loadUrl("https://www.tiktok.com/")
+    }
+
+    private fun openStudio() {
+        homePanel.visibility = android.view.View.GONE
+        webView.visibility = android.view.View.VISIBLE
+        webView.loadUrl("https://www.tiktok.com/tiktokstudio/upload?from=creator_center&tab=video")
     }
 
     override fun onSaveInstanceState(outState: android.os.Bundle) {
@@ -69,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_studio -> {
-                webView.loadUrl("https://www.tiktok.com/tiktokstudio/upload?from=creator_center&tab=video")
+                openStudio()
                 true
             }
             R.id.action_extensions -> {
@@ -77,7 +100,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_refresh -> {
-                webView.reload()
+                if (webView.visibility == android.view.View.VISIBLE) webView.reload()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -105,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                if (url != null) ExtensionManager.injectForUrl(this@MainActivity, view!!, url)
+                if (url != null && view != null) ExtensionManager.injectForUrl(this@MainActivity, view, url)
                 splash.visibility = android.view.View.GONE
             }
 
@@ -121,7 +144,6 @@ class MainActivity : AppCompatActivity() {
                 val uri = request?.url ?: return false
                 val host = uri.host ?: return false
                 if (isAllowedHost(host)) return false
-                // open external for non-allowed hosts (e.g. oauth providers handled above)
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, uri))
                 } catch (_: Exception) { }
@@ -161,14 +183,12 @@ class MainActivity : AppCompatActivity() {
     private fun isAllowedHost(host: String): Boolean {
         val h = host.lowercase()
         if (h == "tiktok.com" || h.endsWith(".tiktok.com")) return true
-        // allow common login providers
         val allowed = setOf(
             "accounts.google.com",
             "www.facebook.com",
             "m.facebook.com",
             "appleid.apple.com",
-            "login.microsoftonline.com",
-            "www.tiktok.com"
+            "login.microsoftonline.com"
         )
         return h in allowed
     }
@@ -187,7 +207,14 @@ class MainActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+        if (homePanel.visibility == android.view.View.VISIBLE) {
+            finish()
+        } else if (webView.visibility == android.view.View.VISIBLE && webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            homePanel.visibility = android.view.View.VISIBLE
+            webView.visibility = android.view.View.GONE
+        }
     }
 
     override fun onDestroy() {

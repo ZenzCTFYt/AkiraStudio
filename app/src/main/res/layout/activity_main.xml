@@ -6,11 +6,48 @@
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/homePanel"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AkiraStudio"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:paddingBottom="24dp" />
+
+        <Button
+            android:id="@+id/btnOpenTikTok"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Buka TikTok" />
+
+        <Button
+            android:id="@+id/btnOpenStudio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Buka TikTok Studio" />
+
+        <Button
+            android:id="@+id/btnExtensions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tambah Extensions" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/splash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:visibility="gone" />
 </FrameLayout>
