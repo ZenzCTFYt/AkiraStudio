@@ -187,6 +187,7 @@ class MainActivity : AppCompatActivity() {
         menu.findItem(R.id.action_desktop)?.isChecked = desktopMode
         menu.findItem(R.id.action_fit)?.isChecked = fitToScreen
 
+        ExtensionManager.reload(this)
         val exts = ExtensionManager.list(this)
         val sub = menu.addSubMenu("Extensions")
         if (exts.isEmpty()) {
@@ -368,6 +369,12 @@ class MainActivity : AppCompatActivity() {
         } else {
             showHome()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ExtensionManager.reload(this)
+        invalidateOptionsMenu()
     }
 
     override fun onDestroy() {

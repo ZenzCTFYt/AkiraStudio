@@ -35,7 +35,7 @@ class ExtensionsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnImport).setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
-                type = "application/zip"
+                type = "*/*"
             }
             importLauncher.launch(intent)
         }
@@ -55,6 +55,7 @@ class ExtensionsActivity : AppCompatActivity() {
     }
 
     private fun refresh() {
+        ExtensionManager.reload(this)
         val exts = ExtensionManager.list(this)
         val adapter = ExtensionAdapter(this, exts)
         listView.adapter = adapter
