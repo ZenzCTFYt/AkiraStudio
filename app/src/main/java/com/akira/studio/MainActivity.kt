@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
     private fun openTikTok() {
         homePanel.visibility = android.view.View.GONE
         webView.visibility = android.view.View.VISIBLE
-        webView.loadUrl("https://www.tiktok.com/")
+        webView.loadUrl("https://www.tiktok.com/login")
     }
 
     private fun openStudio() {

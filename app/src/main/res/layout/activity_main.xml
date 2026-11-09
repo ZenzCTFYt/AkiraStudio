@@ -29,7 +29,7 @@
             android:id="@+id/btnOpenTikTok"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Buka TikTok" />
+            android:text="Buka Web Login TikTok" />
 
         <Button
             android:id="@+id/btnOpenStudio"
