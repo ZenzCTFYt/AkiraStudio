@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/glass_button"
-            android:text="Tambah Extensions"
+            android:text="Buka Menu Extensions"
             android:textColor="#0f172a" />
     </LinearLayout>
 
@@ -103,7 +103,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:background="@drawable/glass_button"
-            android:text="Ext"
+            android:text="Extensions"
             android:textColor="#0f172a" />
     </LinearLayout>
 
