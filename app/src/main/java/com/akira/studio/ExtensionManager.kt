@@ -237,6 +237,8 @@ object ExtensionManager {
         }
     }
 
+    fun readFilePublic(base: File, rel: String): String? = readFile(base, rel)
+
     private fun readFile(base: File, rel: String): String? {
         val f = File(base, rel)
         return if (f.exists() && f.isFile) f.readText() else null

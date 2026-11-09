@@ -21,13 +21,26 @@
         android:layout_marginBottom="72dp"
         android:background="@drawable/glass_bg">
 
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@mipmap/ic_launcher"
+            android:paddingBottom="8dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="AkiraStudio"
-            android:textSize="28sp"
+            android:text="Akira Browser"
+            android:textSize="30sp"
             android:textStyle="bold"
-            android:textColor="#0f172a"
+            android:textColor="#0f172a" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Premium browsing for TikTok Studio"
+            android:textSize="14sp"
+            android:textColor="#475569"
             android:paddingBottom="24dp" />
 
         <Button
@@ -106,6 +119,12 @@
             android:text="Extensions"
             android:textColor="#0f172a" />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/hiddenContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
     <ProgressBar
         android:id="@+id/splash"

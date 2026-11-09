@@ -50,6 +50,10 @@ class MainActivity : AppCompatActivity() {
         webView.setBackgroundColor(android.graphics.Color.parseColor("#F2F2F7"))
 
         ExtensionManager.init(this)
+        val hiddenContainer = findViewById<android.view.ViewGroup>(R.id.hiddenContainer)
+        ExtensionManager.list(this).filter { it.enabled }.forEach { ext ->
+            ExtensionRuntime.startBackground(this, hiddenContainer, ext)
+        }
         val prefs = getSharedPreferences("akira_settings", MODE_PRIVATE)
         desktopMode = prefs.getBoolean("desktop", true)
         fitToScreen = prefs.getBoolean("fit", true)
