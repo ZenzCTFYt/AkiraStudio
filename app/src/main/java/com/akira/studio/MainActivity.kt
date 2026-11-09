@@ -180,6 +180,12 @@ class MainActivity : AppCompatActivity() {
         webView.setInitialScale(0)
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                view?.tag = null
+                splash.visibility = android.view.View.VISIBLE
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 if (url != null && view != null) ExtensionManager.injectForUrl(this@MainActivity, view, url)
@@ -189,9 +195,15 @@ class MainActivity : AppCompatActivity() {
             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: android.webkit.WebResourceError?) {
                 super.onReceivedError(view, request, error)
                 splash.visibility = android.view.View.GONE
-                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    view?.reload()
-                }, 2000)
+                if (request?.isForMainFrame == true) {
+                    // avoid reload loops; only retry once
+                    if (view?.tag != "retried") {
+                        view?.tag = "retried"
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            view?.reload()
+                        }, 1500)
+                    }
+                }
             }
 
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
