@@ -10,5 +10,5 @@ Android WebView browser focused on TikTok web + TikTok Studio upload, with a lig
 ## Notes
 - Login uses the normal TikTok web flow.
 - Only TikTok domains (and required login providers) are allowed in the main frame.
-- Extensions: import a ZIP containing `manifest.json` (Chrome-style content_scripts) from device storage. Full Chrome extension APIs are not supported; content scripts only.
+- Extensions: tap the Extensions (puzzle) button → Manage/Import to import a ZIP containing `manifest.json`. Click an extension icon to open its real popup (action.default_popup). Sample test extension: `AkiraTestExtension.zip` (in Downloads).
 - Package/name uses "akira"; rename if publishing.
